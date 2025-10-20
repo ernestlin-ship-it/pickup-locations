@@ -1,355 +1,419 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Jumppoint X 7-Eleven 自提點、自寄點查詢</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jumppoint X 7-Eleven 自提點、自寄點查詢</title>
 
-<!-- Google 字體 -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <!-- Google 字體 -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
 
-<style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f9fafa;
-    color: #383e71;
-    margin: 20px;
-  }
-  .container {
-    max-width: 1000px;
-    margin: auto;
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: inset 0 0 60px 0 rgb(122 111 168 / 0.1);
-  }
-  h2 {
-    font-weight: 300;
-    font-size: 32px;
-    text-align: center;
-    margin-bottom: 20px;
-    color: #1246A0;
-  }
-  .lang-switch {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .lang-switch button {
-    background-color: #1467D6;
-    color: #fff;
-    border: none;
-    border-radius: 7px;
-    padding: 9px 22px;
-    font-weight: 600;
-    cursor: pointer;
-    margin: 0 10px;
-  }
-  .lang-switch button:hover {
-    background-color: #0D3B79;
-  }
-  #searchContainer {
-    margin-bottom: 8px;
-  }
-  #searchInput, #regionFilter {
-    padding: 10px;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    box-shadow: inset 0 0 12px rgb(76 136 225 / 0.15);
-    margin-right: 8px;
-  }
-  #regionFilter {
-    min-width: 150px;
-  }
-  .sort-hint {
-    text-align: center;
-    font-size: 14px;
-    font-style: italic;
-    color: #888;
-    margin-bottom: 8px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    box-shadow: inset 0 0 15px rgb(81 94 153 / 0.15);
-    border-radius: 10px;
-    background: #fff;
-    table-layout: fixed;
-  }
-  th, td {
-    padding: 15px;
-    text-align: center;
-    border-bottom: 1px solid #d1dff5;
-    font-weight: 400;
-    font-size: 14px;
-  }
-  th {
-    background-color: #d1daff;
-    font-weight: 600;
-    cursor: pointer;
-    color: #1246A0;
-    user-select: none;
-  }
-  th:hover {
-    background-color: #b8ccff;
-    color: #0d276b;
-  }
-  tr:hover {
-    background-color: #cae0ff;
-  }
-  a {
-    color: #1467D6;
-    text-decoration: none;
-  }
-  a:hover {
-    text-decoration: underline;
-  }
-  @media(max-width:600px) {
-    table, thead, tbody, th, td, tr {
-      display: block;
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafa;
+      color: #383e71;
+      margin: 20px;
     }
-    tr {
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: inset 0 0 60px 0 rgb(122 111 168 / 0.1);
+    }
+
+    h2 {
+      font-weight: 300;
+      font-size: 32px;
+      text-align: center;
       margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 15px #a5bbec;
-      padding: 15px;
-    }
-    th { display: none; }
-    td {
-      position: relative;
-      padding-left: 55%;
-      padding-top: 10px;
-      padding-bottom: 10px;
-      border: none;
-      border-bottom: 1px solid #d1dff5;
-      text-align: right;
-    }
-    td:before {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      width: 45%;
-      font-weight: 600;
       color: #1246A0;
-      white-space: nowrap;
-      content: attr(data-label);
-      font-size: 14px;
-      text-align: left;
     }
-  }
-  #pagination {
-    margin: 15px 0;
-    text-align:center;
-  }
-  #pagination button {
-    margin: 0 3px;
-    padding: 5px 12px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #1467D6;
-    background: #fff;
-    cursor: pointer;
-  }
-  #pagination button:disabled {
-    background: #1467D6;
-    color: #fff;
-    cursor: default;
-  }
-</style>
+
+    .lang-switch {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .lang-switch button {
+      background-color: #1467D6;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 9px 22px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0 10px;
+    }
+
+    .lang-switch button:hover {
+      background-color: #0D3B79;
+    }
+
+    #searchContainer {
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    #searchInput,
+    #regionButtons button {
+      padding: 10px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-shadow: inset 0 0 12px rgb(76 136 225 / 0.15);
+      margin-right: 8px;
+      cursor: pointer;
+    }
+
+    #regionButtons button {
+      display: inline-block;
+      margin: 3px;
+      border-radius: 7px;
+      border: 1px solid #1467D6;
+      background-color: white;
+      color: #1467D6;
+      font-weight: 600;
+      min-width: 80px;
+    }
+
+    #regionButtons button.active {
+      background-color: #1467D6;
+      color: white;
+    }
+
+    .sort-hint {
+      text-align: center;
+      font-size: 14px;
+      font-style: italic;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: inset 0 0 15px rgb(81 94 153 / 0.15);
+      border-radius: 10px;
+      background: #fff;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #d1dff5;
+      font-weight: 400;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #d1daff;
+      font-weight: 600;
+      cursor: pointer;
+      color: #1246A0;
+      user-select: none;
+    }
+
+    th:hover {
+      background-color: #b8ccff;
+      color: #0d276b;
+    }
+
+    tr:hover {
+      background-color: #cae0ff;
+    }
+
+    a {
+      color: #1467D6;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media(max-width:600px) {
+      table,
+      thead,
+      tbody,
+      th,
+      td,
+      tr {
+        display: block;
+      }
+
+      tr {
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px #a5bbec;
+        padding: 15px;
+      }
+
+      th {
+        display: none;
+      }
+
+      td {
+        position: relative;
+        padding-left: 55%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        border: none;
+        border-bottom: 1px solid #d1dff5;
+        text-align: right;
+      }
+
+      td:before {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        width: 45%;
+        font-weight: 600;
+        color: #1246A0;
+        white-space: nowrap;
+        content: attr(data-label);
+        font-size: 14px;
+        text-align: left;
+      }
+    }
+
+    #pagination {
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    #pagination button {
+      margin: 0 3px;
+      padding: 5px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #1467D6;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    #pagination button:disabled {
+      background: #1467D6;
+      color: #fff;
+      cursor: default;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-<h2 id="title">Jumppoint X 7-Eleven 自提點、自寄點查詢</h2>
-<div class="lang-switch">
-  <button onclick="setLang('zh')">中文</button>
-  <button onclick="setLang('en')">English</button>
-</div>
+  <div class="container">
+    <h2 id="title">Jumppoint X 7-Eleven 自提點、自寄點查詢</h2>
+    <div class="lang-switch">
+      <button onclick="setLang('zh')">中文</button>
+      <button onclick="setLang('en')">English</button>
+    </div>
 
-<div id="searchContainer">
-  <select id="regionFilter" onchange="filterAndDisplay()">
-    <option value="">全部區域</option>
-  </select>
-  <input type="text" id="searchInput" placeholder="搜尋區域、點碼或地址…" onkeyup="filterAndDisplay()" />
-</div>
+    <div id="searchContainer">
+      <div id="regionButtons" style="margin-bottom: 8px;">
+        <button onclick="setRegionFilter('')">全部區域</button>
+        <button onclick="setRegionFilter('九龍')">九龍</button>
+        <button onclick="setRegionFilter('新界')">新界</button>
+        <button onclick="setRegionFilter('港島')">港島</button>
+        <button onclick="setRegionFilter('離島')">離島</button>
+      </div>
+      <input type="text" id="searchInput" placeholder="搜尋區域、點碼或地址…" onkeyup="filterAndDisplay()" />
+    </div>
 
-<p class="sort-hint">點擊表格標題即可排序</p>
+    <p class="sort-hint">點擊表格標題即可排序</p>
 
-<table id="storeTable">
-  <thead>
-    <tr>
-      <th onclick="sortTable(0)">區域 <span id="sort-arrow-0"></span></th>
-      <th onclick="sortTable(1)">地區 <span id="sort-arrow-1"></span></th>
-      <th onclick="sortTable(2)">自提點編號 <span id="sort-arrow-2"></span></th>
-      <th>地址</th>
-      <th>營業時間(週一至五)</th>
-      <th>營業時間(週六)</th>
-      <th>營業時間(週日及公眾假期)</th>
-      <th>Phase</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
-</table>
+    <table id="storeTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">區域 <span id="sort-arrow-0"></span></th>
+          <th onclick="sortTable(1)">地區 <span id="sort-arrow-1"></span></th>
+          <th onclick="sortTable(2)">自提點編號 <span id="sort-arrow-2"></span></th>
+          <th>地址</th>
+          <th>營業時間(週一至五)</th>
+          <th>營業時間(週六)</th>
+          <th>營業時間(週日及公眾假期)</th>
+          <th>Phase</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
 
-<div id="pagination"></div>
-</div>
+    <div id="pagination"></div>
+  </div>
 
-<script>
-  let data = [];
-  let filteredData = [];
-  let currentLang = 'zh';
-  let currentSort = { col: null, ascending: true };
-  let currentPage = 1;
-  const pageSize = 50;
+  <script>
+    let data = [];
+    let filteredData = [];
+    let currentLang = 'zh';
+    let currentSort = {
+      col: null,
+      ascending: true
+    };
+    let currentPage = 1;
+    let currentRegionFilter = '';
+    const pageSize = 50;
 
-  fetch('data.json')
-    .then(res => res.json())
-    .then(json => {
-      data = json;
-      populateRegionFilter();
+    // 載入 JSON 並呼叫 function
+    fetch('data.json')
+      .then(res => res.json())
+      .then(json => {
+        data = json;
+        // 預處理文字搜尋合併欄位
+        data.forEach(item => {
+          const zhAddr = item['中文地址'] || '';
+          const enAddr = item['英文地址'] || '';
+          const areaZh = item['區域']?.zh || '';
+          const areaEn = item['區域']?.en || '';
+          const districtZh = item['地區']?.zh || '';
+          const districtEn = item['地區']?.en || '';
+          const code = item['自提點編號 Pick up store code'] || '';
+          item.mergedSearchText = (zhAddr + enAddr + areaZh + areaEn + districtZh + districtEn + code).toLowerCase();
+        });
+        filterAndDisplay();
+      });
+
+    function setLang(lang) {
+      currentLang = lang;
+      document.getElementById('title').innerText = lang === 'zh' ? 'Jumppoint X 7-Eleven 自提點、自寄點查詢' : 'Jumppoint X 7-Eleven Pickup Point Search';
+      document.getElementById('searchInput').placeholder = lang === 'zh' ? '搜尋區域、點碼或地址…' : 'Search area, code or address...';
       filterAndDisplay();
-    });
+    }
 
-  function setLang(lang) {
-    currentLang = lang;
-    document.getElementById('title').innerText = lang === 'zh' ? 'Jumppoint X 7-Eleven 自提點、自寄點查詢' : 'Jumppoint X 7-Eleven Pickup Point Search';
-    document.getElementById('searchInput').placeholder = lang === 'zh' ? '搜尋區域、點碼或地址…' : 'Search area, code or address...';
-    filterAndDisplay();
-  }
+    // 設定區域過濾，更新按鈕狀態
+    function setRegionFilter(region) {
+      currentRegionFilter = region.toLowerCase();
+      // 按鈕活躍狀態切換
+      let buttons = document.querySelectorAll('#regionButtons button');
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase() === currentRegionFilter);
+      });
+      filterAndDisplay();
+    }
 
-  function populateRegionFilter() {
-    const select = document.getElementById('regionFilter');
-    select.innerHTML = `<option value="">全部區域</option>`;
-    const regions = Array.from(new Set(data.map(d => d['區域'][currentLang]))).sort();
-    regions.forEach(r => {
-      const option = document.createElement('option');
-      option.value = r;
-      option.textContent = r;
-      select.appendChild(option);
-    });
-  }
+    // 過濾顯示
+    function filterAndDisplay() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      filteredData = data.filter(d => {
+        const areaZh = d['區域'].zh.toLowerCase();
+        const areaEn = d['區域'].en.toLowerCase();
+        const districtZh = d['地區'].zh.toLowerCase();
+        const districtEn = d['地區'].en.toLowerCase();
+        const code = d['自提點編號 Pick up store code'].toLowerCase();
+        const merged = d.mergedSearchText;
 
-  function filterAndDisplay() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const selectedRegion = document.getElementById('regionFilter').value;
-
-    filteredData = data.filter(d => {
-      const combinedText = (d['區域'][currentLang] + d['地區'][currentLang] + d['自提點編號 Pick up store code'] + d['中文地址'] + d['英文地址']).toLowerCase();
-      const regionMatch = selectedRegion ? d['區域'][currentLang] === selectedRegion : true;
-
-      return regionMatch && combinedText.includes(searchTerm);
-    });
-
-    currentPage = 1; // 過濾後重置回第一頁
-    displayTable();
-    displayPagination();
-  }
-
-  function displayTable() {
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-
-    // 排序
-    if(currentSort.col !== null) {
-      filteredData.sort((a, b) => {
-        let aVal, bVal;
-        switch(currentSort.col) {
-          case 0: aVal = a['區域'][currentLang]; bVal = b['區域'][currentLang]; break;
-          case 1: aVal = a['地區'][currentLang]; bVal = b['地區'][currentLang]; break;
-          case 2: aVal = a['自提點編號 Pick up store code']; bVal = b['自提點編號 Pick up store code']; break;
-          default: aVal = ''; bVal = '';
+        let regionMatch = true;
+        if (currentRegionFilter) {
+          regionMatch = (areaZh === currentRegionFilter || areaEn === currentRegionFilter);
         }
-        if(aVal < bVal) return currentSort.ascending ? -1 : 1;
-        if(aVal > bVal) return currentSort.ascending ? 1 : -1;
-        return 0;
+        return regionMatch && merged.includes(searchTerm);
+      });
+      currentPage = 1;
+      displayTable();
+      displayPagination();
+    }
+
+    // 渲染表格
+    function displayTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      if (filteredData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8">無符合條件的資料</td></tr>`;
+        return;
+      }
+      // 排序
+      if (currentSort.col !== null) {
+        filteredData.sort((a, b) => {
+          let aVal, bVal;
+          switch (currentSort.col) {
+            case 0:
+              aVal = a['區域'][currentLang];
+              bVal = b['區域'][currentLang];
+              break;
+            case 1:
+              aVal = a['地區'][currentLang];
+              bVal = b['地區'][currentLang];
+              break;
+            case 2:
+              aVal = a['自提點編號 Pick up store code'];
+              bVal = b['自提點編號 Pick up store code'];
+              break;
+            default:
+              aVal = '';
+              bVal = '';
+          }
+          if (aVal < bVal) return currentSort.ascending ? -1 : 1;
+          if (aVal > bVal) return currentSort.ascending ? 1 : -1;
+          return 0;
+        });
+      }
+
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageData = filteredData.slice(start, end);
+
+      pageData.forEach(row => {
+        const tr = document.createElement('tr');
+        const address = currentLang === 'zh' ? row['中文地址'] : (row['英文地址'] || row['中文地址']);
+        tr.innerHTML = `
+          <td data-label="${currentLang === 'zh' ? '區域' : 'Area'}">${row['區域'][currentLang]}</td>
+          <td data-label="${currentLang === 'zh' ? '地區' : 'District'}">${row['地區'][currentLang]}</td>
+          <td data-label="${currentLang === 'zh' ? '自提點編號' : 'Pickup Code'}">${row['自提點編號 Pick up store code']}</td>
+          <td data-label="${currentLang === 'zh' ? '地址' : 'Address'}"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank">${address}</a></td>
+          <td data-label="${currentLang === 'zh' ? '營業時間(週一至五)' : 'Weekday Hours'}">${row['Mon-Fri (星期一至五開放時間)']}</td>
+          <td data-label="${currentLang === 'zh' ? '營業時間(週六)' : 'Saturday Hours'}">${row['Sat (星期六開放時間)']}</td>
+          <td data-label="${currentLang === 'zh' ? '營業時間(週日及公眾假期)' : 'Sunday & PH Hours'}">${row['Sun & PH (星期日及公眾假期開放時間)']}</td>
+          <td data-label="Phase">${row['Phase']}</td>
+        `;
+        tbody.appendChild(tr);
       });
     }
 
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    const pageData = filteredData.slice(start, end);
+    // 排序功能
+    function sortTable(colIndex) {
+      if (currentSort.col === colIndex) {
+        currentSort.ascending = !currentSort.ascending;
+      } else {
+        currentSort.col = colIndex;
+        currentSort.ascending = true;
+      }
 
-    pageData.forEach(row => {
-      const tr = document.createElement('tr');
-      const address = currentLang === 'zh' ? row['中文地址'] : (row['英文地址'] || row['中文地址']);
-      tr.innerHTML = `
-        <td data-label="${currentLang === 'zh' ? '區域' : 'Area'}">${row['區域'][currentLang]}</td>
-        <td data-label="${currentLang === 'zh' ? '地區' : 'District'}">${row['地區'][currentLang]}</td>
-        <td data-label="${currentLang === 'zh' ? '自提點編號' : 'Pickup Code'}">${row['自提點編號 Pick up store code']}</td>
-        <td data-label="${currentLang === 'zh' ? '地址' : 'Address'}"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank">${address}</a></td>
-        <td data-label="${currentLang === 'zh' ? '營業時間(週一至五)' : 'Weekday Hours'}">${row['Mon-Fri (星期一至五開放時間)']}</td>
-        <td data-label="${currentLang === 'zh' ? '營業時間(週六)' : 'Saturday Hours'}">${row['Sat (星期六開放時間)']}</td>
-        <td data-label="${currentLang === 'zh' ? '營業時間(週日及公眾假期)' : 'Sunday & PH Hours'}">${row['Sun & PH (星期日及公眾假期開放時間)']}</td>
-        <td data-label="Phase">${row['Phase']}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+      // 更新排序箭頭
+      for (let i = 0; i <= 7; i++) {
+        const arrow = document.getElementById(`sort-arrow-${i}`);
+        arrow.textContent = i === currentSort.col ? (currentSort.ascending ? '▲' : '▼') : '';
+      }
 
-function sortTable(colIndex) {
-  if (currentSort.col === colIndex) {
-    currentSort.ascending = !currentSort.ascending;
-  } else {
-    currentSort.col = colIndex;
-    currentSort.ascending = true;
-  }
-
-  // 更新排序箭頭顯示
-  for (let i = 0; i <= 7; i++) {
-    const arrow = document.getElementById(`sort-arrow-${i}`);
-    arrow.textContent = i === currentSort.col ? (currentSort.ascending ? '▲' : '▼') : '';
-  }
-
-  // 針對 filteredData 排序
-  filteredData.sort((a, b) => {
-    let aVal, bVal;
-    switch (currentSort.col) {
-      case 0:
-        aVal = a['區域'][currentLang];
-        bVal = b['區域'][currentLang];
-        break;
-      case 1:
-        aVal = a['地區'][currentLang];
-        bVal = b['地區'][currentLang];
-        break;
-      case 2:
-        aVal = a['自提點編號 Pick up store code'];
-        bVal = b['自提點編號 Pick up store code'];
-        break;
-      default:
-        aVal = '';
-        bVal = '';
-        break;
+      currentPage = 1;
+      displayTable();
+      displayPagination();
     }
-    if (aVal < bVal) return currentSort.ascending ? -1 : 1;
-    if (aVal > bVal) return currentSort.ascending ? 1 : -1;
-    return 0;
-  });
 
-  currentPage = 1; // 排序後回到第一頁
-  displayTable();
-  displayPagination();
-}
+    // 分頁功能
+    function displayPagination() {
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      const totalPages = Math.ceil(filteredData.length / pageSize);
 
-
-  function displayPagination() {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-    const totalPages = Math.ceil(filteredData.length / pageSize);
-
-    for(let i=1; i<=totalPages; i++) {
-      const button = document.createElement('button');
-      button.textContent = i;
-      button.disabled = (i === currentPage);
-      button.onclick = () => {
-        currentPage = i;
-        displayTable();
-        displayPagination();
-      };
-      pagination.appendChild(button);
+      for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.disabled = (i === currentPage);
+        button.onclick = () => {
+          currentPage = i;
+          displayTable();
+          displayPagination();
+        };
+        pagination.appendChild(button);
+      }
     }
-  }
-</script>
+  </script>
 
 </body>
+
 </html>
