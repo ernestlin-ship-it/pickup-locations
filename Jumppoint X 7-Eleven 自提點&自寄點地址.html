@@ -164,19 +164,20 @@
 
 <script>
   let data = [];
+  let currentLang = 'zh';
+
+  // 載入 JSON 並呼叫 buildTable
   fetch('data.json')
-.then(res => res.json())
-.then(data => {
-  const tbody = document.getElementById('tableBody');
-  data.forEach(item => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${item.區域.zh}</td><td>${item['自提點編號 Pick up store code']}</td><td>${item.中文地址}</td>`;
-    tbody.appendChild(tr);
-  });
-});
+    .then(res => res.json())
+    .then(json => {
+      data = json;
+      buildTable();
+    })
+    .catch(err => {
+      console.error('載入 data.json 失敗:', err);
+    });
 
-  let currentLang='zh';
-
+  // 切換語言
   function setLang(lang) {
     currentLang = lang;
     document.getElementById('title').innerText = lang === 'zh' ? 'Jumppoint 7-Eleven 自提點查詢' : 'Jumppoint 7-Eleven Pickup Point Search';
@@ -184,25 +185,28 @@
     buildTable();
   }
 
+  // 根據當前data和語言重建表格
   function buildTable() {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
     data.forEach(row => {
-      const address = currentLang==='zh' ? row['中文地址'] : row['英文地址'];
-      tbody.innerHTML += `
-        <tr>
-          <td data-label="${currentLang==='zh' ? '區域' : 'Area'}">${row['區域'][currentLang]}</td>
-          <td data-label="${currentLang==='zh' ? '地區' : 'District'}">${row['地區'][currentLang]}</td>
-          <td data-label="${currentLang==='zh' ? '自提點編號' : 'Pickup Code'}">${row['自提點編號 Pick up store code']}</td>
-          <td data-label="${currentLang==='zh' ? '地址' : 'Address'}"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank">${address}</a></td>
-          <td data-label="${currentLang==='zh' ? '營業時間(週一至五)' : 'Weekday Hours'}">${row['Mon-Fri (星期一至五開放時間)']}</td>
-          <td data-label="${currentLang==='zh' ? '營業時間(週六)' : 'Saturday Hours'}">${row['Sat (星期六開放時間)']}</td>
-          <td data-label="${currentLang==='zh' ? '營業時間(週日及公眾假期)' : 'Sunday & PH Hours'}">${row['Sun & PH (星期日及公眾假期開放時間)']}</td>
-          <td data-label="Phase">${row['Phase']}</td>
-        </tr>`;
+      const address = currentLang === 'zh' ? row['中文地址'] : (row['英文地址'] || row['中文地址']);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td data-label="${currentLang === 'zh' ? '區域' : 'Area'}">${row['區域'][currentLang]}</td>
+        <td data-label="${currentLang === 'zh' ? '地區' : 'District'}">${row['地區'][currentLang]}</td>
+        <td data-label="${currentLang === 'zh' ? '自提點編號' : 'Pickup Code'}">${row['自提點編號 Pick up store code']}</td>
+        <td data-label="${currentLang === 'zh' ? '地址' : 'Address'}"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank">${address}</a></td>
+        <td data-label="${currentLang === 'zh' ? '營業時間(週一至五)' : 'Weekday Hours'}">${row['Mon-Fri (星期一至五開放時間)']}</td>
+        <td data-label="${currentLang === 'zh' ? '營業時間(週六)' : 'Saturday Hours'}">${row['Sat (星期六開放時間)']}</td>
+        <td data-label="${currentLang === 'zh' ? '營業時間(週日及公眾假期)' : 'Sunday & PH Hours'}">${row['Sun & PH (星期日及公眾假期開放時間)']}</td>
+        <td data-label="Phase">${row['Phase']}</td>
+      `;
+      tbody.appendChild(tr);
     });
   }
 
+  // 搜尋欄過濾
   function filterTable() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase();
@@ -212,28 +216,33 @@
     });
   }
 
+  // 排序功能（可改進加全局紀錄排序方向）
   function sortTable(colIndex) {
     const tbody = document.getElementById('tableBody');
     const rows = Array.from(tbody.rows);
-    let ascending = true;
+    let ascending = true; // 可設全域陣列追踪排序方向
+
     rows.sort((a, b) => {
       let aText = a.cells[colIndex].innerText.trim().toLowerCase();
       let bText = b.cells[colIndex].innerText.trim().toLowerCase();
-      const aNum = parseFloat(aText.replace(/[^0-9.-]/g,''));
-      const bNum = parseFloat(bText.replace(/[^0-9.-]/g,''));
+
+      const aNum = parseFloat(aText.replace(/[^0-9.-]/g, ''));
+      const bNum = parseFloat(bText.replace(/[^0-9.-]/g, ''));
+
       if (!isNaN(aNum) && !isNaN(bNum)) {
         return ascending ? aNum - bNum : bNum - aNum;
       }
+
       if (aText < bText) return ascending ? -1 : 1;
       if (aText > bText) return ascending ? 1 : -1;
       return 0;
     });
+
     rows.forEach(row => tbody.appendChild(row));
-    // 切換排序方向
-    // 可以做一個全局變數來記錄每個欄位方向
+    // 切換排序方向（要實作全局變數管理）
   }
 
-  setLang('zh');
 </script>
+
 </body>
 </html>
