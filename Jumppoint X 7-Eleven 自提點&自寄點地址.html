@@ -253,7 +253,7 @@ let filteredData = [];
 let currentLang = 'zh';
 let currentSort = { col: null, ascending: true };
 let currentPage = 1;
-let currentRegionFilter = '全部區域';
+let currentRegionFilter = ''; // 改為空字串代表全部區域
 const pageSize = 50;
 
 // 兩語言的分區按鈕文字
@@ -296,14 +296,14 @@ function setLang(lang) {
   filterAndDisplay();
 }
 
-// 更新分區按鈕文字
+// 更新分區按鈕文字及active狀態
 function updateRegionButtons() {
   const container = document.getElementById('regionButtons');
   container.innerHTML = '';
   regionLabels[currentLang].forEach((label, i) => {
     const btn = document.createElement('button');
     btn.textContent = label || (currentLang === 'zh' ? '全部區域' : 'All Regions');
-    btn.className = (label.toLowerCase() === currentRegionFilter) ? 'active' : '';
+    btn.className = (label.toLowerCase() === currentRegionFilter || (label === '' && currentRegionFilter === '')) ? 'active' : '';
     btn.onclick = () => {
       setRegionFilter(label.toLowerCase());
     };
@@ -322,11 +322,17 @@ function updateTableHeader() {
   for (let i = 0; i < headers.length; i++) {
     const th = document.querySelector(`#storeTable th:nth-child(${i + 1})`);
     if (th) {
-      th.firstChild.textContent = headers[i] + ' ';
+      // 預留排序arrow的地方，先刪除所有文字節點再加新文字
+      th.innerHTML = ''; 
+      th.appendChild(document.createTextNode(headers[i] + ' '));
+      const arrowSpan = document.createElement('span');
+      arrowSpan.id = `sort-arrow-${i}`;
+      th.appendChild(arrowSpan);
+      if (currentSort.col === i) {
+        arrowSpan.textContent = currentSort.ascending ? '▲' : '▼';
+      }
     }
   }
-  // 更新箭頭顯示
-  updateSortArrows();
 }
 
 function filterAndDisplay() {
@@ -443,6 +449,11 @@ function displayPagination() {
     pagination.appendChild(button);
   }
 }
+  </script>
+</body>
+
+</html>
+
 
   </script>
 
