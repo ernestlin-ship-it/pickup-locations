@@ -286,25 +286,51 @@
     });
   }
 
-  function sortTable(colIndex) {
-    if(currentSort.col === colIndex) {
-      currentSort.ascending = !currentSort.ascending;
-    } else {
-      currentSort.col = colIndex;
-      currentSort.ascending = true;
-    }
-
-    // 更新排序箭頭顯示
-    for(let i=0; i<=7; i++) {
-      const arrow = document.getElementById(`sort-arrow-${i}`);
-      if(i === currentSort.col) {
-        arrow.textContent = currentSort.ascending ? '▲' : '▼';
-      } else {
-        arrow.textContent = '';
-      }
-    }
-    displayTable();
+function sortTable(colIndex) {
+  if (currentSort.col === colIndex) {
+    currentSort.ascending = !currentSort.ascending;
+  } else {
+    currentSort.col = colIndex;
+    currentSort.ascending = true;
   }
+
+  // 更新排序箭頭顯示
+  for (let i = 0; i <= 7; i++) {
+    const arrow = document.getElementById(`sort-arrow-${i}`);
+    arrow.textContent = i === currentSort.col ? (currentSort.ascending ? '▲' : '▼') : '';
+  }
+
+  // 針對 filteredData 排序
+  filteredData.sort((a, b) => {
+    let aVal, bVal;
+    switch (currentSort.col) {
+      case 0:
+        aVal = a['區域'][currentLang];
+        bVal = b['區域'][currentLang];
+        break;
+      case 1:
+        aVal = a['地區'][currentLang];
+        bVal = b['地區'][currentLang];
+        break;
+      case 2:
+        aVal = a['自提點編號 Pick up store code'];
+        bVal = b['自提點編號 Pick up store code'];
+        break;
+      default:
+        aVal = '';
+        bVal = '';
+        break;
+    }
+    if (aVal < bVal) return currentSort.ascending ? -1 : 1;
+    if (aVal > bVal) return currentSort.ascending ? 1 : -1;
+    return 0;
+  });
+
+  currentPage = 1; // 排序後回到第一頁
+  displayTable();
+  displayPagination();
+}
+
 
   function displayPagination() {
     const pagination = document.getElementById('pagination');
