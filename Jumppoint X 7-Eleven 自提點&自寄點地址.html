@@ -164,14 +164,16 @@
 
 <script>
   let data = [];
-
-  fetch('output_pickup_points.json')
-    .then(response => response.json())
-    .then(json => {
-      data = json;
-      buildTable();  // 呼叫你原本顯示表格的函數
-    })
-    .catch(err => console.error('載入JSON失敗:', err));
+  fetch('data.json')
+.then(res => res.json())
+.then(data => {
+  const tbody = document.getElementById('tableBody');
+  data.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${item.區域.zh}</td><td>${item['自提點編號 Pick up store code']}</td><td>${item.中文地址}</td>`;
+    tbody.appendChild(tr);
+  });
+});
 
   let currentLang='zh';
 
