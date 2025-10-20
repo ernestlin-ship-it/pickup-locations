@@ -447,6 +447,23 @@
     }
   }
 
+  function updateTableHeader() {
+  const headers = tableHeaders[currentLang];
+  for (let i = 0; i < headers.length; i++) {
+    const th = document.querySelector(`#storeTable th:nth-child(${i + 1})`);
+    if (th) {
+      th.innerHTML = '';
+      th.appendChild(document.createTextNode(headers[i] + ' '));
+      const arrowSpan = document.createElement('span');
+      arrowSpan.id = `sort-arrow-${i}`;
+      th.appendChild(arrowSpan);
+      if (currentSort.col === i) {
+        arrowSpan.textContent = currentSort.ascending ? '▲' : '▼';
+      }
+    }
+  }
+}
+
   function displayPagination() {
     const paginationBottom = document.getElementById('pagination');
     const paginationTop = document.getElementById('paginationTop');
