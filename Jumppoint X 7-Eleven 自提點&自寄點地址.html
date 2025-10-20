@@ -207,14 +207,38 @@
   }
 
   // 搜尋欄過濾
-  function filterTable() {
+ /* function filterTable() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase();
     document.querySelectorAll('#tableBody tr').forEach(tr => {
       const text = tr.innerText.toLowerCase();
       tr.style.display = text.includes(filter) ? '' : 'none';
     });
-  }
+  } */
+ // 搜尋欄過濾, 無論你輸入中文或英文，都會嘗試在中文地址和 Google 地址網址中找符合項目
+  function filterTable() {
+  const input = document.getElementById('searchInput');
+  const filter = input.value.toLowerCase();
+  document.querySelectorAll('#tableBody tr').forEach(tr => {
+    // 拿每行的中英文地址欄位文字（去除<a>標籤影響）
+    const tds = tr.querySelectorAll('td');
+    const zhAddress = tds[3]?.innerText.toLowerCase() || '';
+    const enAddress = (tds[3]?.querySelector('a')?.getAttribute('href') || '').toLowerCase();
+    const text = tr.innerText.toLowerCase();
+    
+    // 搜尋同時考慮中文地址、英文地址(網址內含地址資訊)、整行文字
+    if (
+      text.includes(filter) || 
+      zhAddress.includes(filter) ||
+      enAddress.includes(filter)
+    ) {
+      tr.style.display = '';
+    } else {
+      tr.style.display = 'none';
+    }
+  });
+}
+
 
   // 排序功能（可改進加全局紀錄排序方向）
   function sortTable(colIndex) {
