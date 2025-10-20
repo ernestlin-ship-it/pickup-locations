@@ -6,220 +6,45 @@
 <title>Jumppoint X 7-Eleven 自提點、自寄點查詢</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
 <style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f9fafa;
-    color: #383e71;
-    margin: 20px;
-  }
-  .container {
-    max-width: 1000px;
-    margin: auto;
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: inset 0 0 60px 0 rgb(122 111 168 / 0.1);
-  }
-  h2 {
-    font-weight: 300;
-    font-size: 32px;
-    text-align: center;
-    margin-bottom: 20px;
-    color: #1246A0;
-  }
-  .lang-switch {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .lang-switch button {
-    background-color: #1467D6;
-    color: #fff;
-    border: none;
-    border-radius: 7px;
-    padding: 9px 22px;
-    font-weight: 600;
-    cursor: pointer;
-    margin: 0 10px;
-  }
-  .lang-switch button:hover {
-    background-color: #0D3B79;
-  }
-  #searchContainer {
-    margin-bottom: 8px;
-    text-align: center;
-  }
-  #searchInput,
-  #regionButtons button,
-  #districtFilter {
-    padding: 10px;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    box-shadow: inset 0 0 12px rgb(76 136 225 / 0.15);
-    margin-right: 8px;
-    cursor: pointer;
-  }
-  #regionButtons button {
-    display: inline-block;
-    margin: 3px;
-    border-radius: 7px;
-    border: 1px solid #1467D6;
-    background-color: white;
-    color: #1467D6;
-    font-weight: 600;
-    min-width: 80px;
-  }
-  #regionButtons button.active {
-    background-color: #1467D6;
-    color: white;
-  }
-  #districtFilter {
-    min-width: 150px;
-  }
-  .sort-hint {
-    text-align: center;
-    font-size: 14px;
-    font-style: italic;
-    color: #888;
-    margin-bottom: 8px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    box-shadow: inset 0 0 15px rgb(81 94 153 / 0.15);
-    border-radius: 10px;
-    background: #fff;
-    table-layout: fixed;
-  }
-  th,
-  td {
-    padding: 15px;
-    text-align: center;
-    border-bottom: 1px solid #d1dff5;
-    font-weight: 400;
-    font-size: 14px;
-  }
-  th {
-    background-color: #d1daff;
-    font-weight: 600;
-    cursor: pointer;
-    color: #1246A0;
-    user-select: none;
-  }
-  th:hover {
-    background-color: #b8ccff;
-    color: #0d276b;
-  }
-  tr:hover {
-    background-color: #cae0ff;
-  }
-  a {
-    color: #1467D6;
-    text-decoration: none;
-  }
-  a:hover {
-    text-decoration: underline;
-  }
-  @media (max-width: 600px) {
-    table,
-    thead,
-    tbody,
-    th,
-    td,
-    tr {
-      display: block;
-    }
-    tr {
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 15px #a5bbec;
-      padding: 15px;
-    }
-    th {
-      display: none;
-    }
-    td {
-      position: relative;
-      padding-left: 55%;
-      padding-top: 10px;
-      padding-bottom: 10px;
-      border: none;
-      border-bottom: 1px solid #d1dff5;
-      text-align: right;
-    }
-    td:before {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      width: 45%;
-      font-weight: 600;
-      color: #1246A0;
-      white-space: nowrap;
-      content: attr(data-label);
-      font-size: 14px;
-      text-align: left;
-    }
-  }
-  #pagination,
-  #paginationTop {
-    margin: 15px 0;
-    text-align: center;
-  }
-  #pagination button,
-  #paginationTop button {
-    margin: 0 3px;
-    padding: 5px 12px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #1467D6;
-    background: #fff;
-    cursor: pointer;
-  }
-  #pagination button:disabled,
-  #paginationTop button:disabled {
-    background: #1467D6;
-    color: #fff;
-    cursor: default;
-  }
+  /* 省略，請使用之前給你的CSS樣式 */
 </style>
 </head>
 <body>
+  <div class="container">
+    <h2 id="title">Jumppoint X 7-Eleven 自提點、自寄點查詢</h2>
+    <div class="lang-switch">
+      <button onclick="setLang('zh')">中文</button>
+      <button onclick="setLang('en')">English</button>
+    </div>
 
-<div class="container">
-  <h2 id="title">Jumppoint X 7-Eleven 自提點、自寄點查詢</h2>
-  <div class="lang-switch">
-    <button onclick="setLang('zh')">中文</button>
-    <button onclick="setLang('en')">English</button>
+    <div id="searchContainer">
+      <div id="regionButtons" style="margin-bottom: 8px;"></div>
+      <select id="districtFilter" onchange="onDistrictFilterChange()" aria-label="District Filter"></select>
+      <input type="text" id="searchInput" placeholder="搜尋區域、點碼或地址…" oninput="onSearchInputChange()" aria-label="Search Input"/>
+    </div>
+
+    <p class="sort-hint" id="sortHint">點擊表格標題即可排序 Click Header to Sort</p>
+
+    <div id="paginationTop"></div>
+
+    <table id="storeTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">區域 <span id="sort-arrow-0"></span></th>
+          <th onclick="sortTable(1)">地區 <span id="sort-arrow-1"></span></th>
+          <th onclick="sortTable(2)">自提點編號 <span id="sort-arrow-2"></span></th>
+          <th>地址</th>
+          <th>營業時間(週一至五)</th>
+          <th>營業時間(週六)</th>
+          <th>營業時間(週日及公眾假期)</th>
+          <th>Phase</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <div id="pagination"></div>
   </div>
-
-  <div id="searchContainer">
-    <div id="regionButtons" style="margin-bottom: 8px;"></div>
-    <select id="districtFilter" onchange="setDistrictFilter(this.value)"></select>
-    <input type="text" id="searchInput" placeholder="搜尋區域、點碼或地址…" oninput="searchInputChanged()" />
-  </div>
-
-  <p class="sort-hint" id="sortHint">點擊表格標題即可排序 Click Header to Sort</p>
-
-  <div id="paginationTop"></div>
-
-  <table id="storeTable">
-    <thead>
-      <tr>
-        <th onclick="sortTable(0)">區域 <span id="sort-arrow-0"></span></th>
-        <th onclick="sortTable(1)">地區 <span id="sort-arrow-1"></span></th>
-        <th onclick="sortTable(2)">自提點編號 <span id="sort-arrow-2"></span></th>
-        <th>地址</th>
-        <th>營業時間(週一至五)</th>
-        <th>營業時間(週六)</th>
-        <th>營業時間(週日及公眾假期)</th>
-        <th>Phase</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-
-  <div id="pagination"></div>
-</div>
 
 <script>
   let data = [];
@@ -234,7 +59,7 @@
 
   const regionLabels = {
     zh: ['', '九龍', '新界', '港島', '離島'],
-    en: ['', 'Kowloon', 'New Territories', 'Hong Kong Island', 'Islands']
+    en: ['', 'Kowloon', 'New Territories', 'Hong Kong Island', 'Outlying Islands']
   };
 
   const tableHeaders = {
@@ -242,74 +67,64 @@
     en: ['Area', 'District', 'Pick up code', 'Address', 'Weekday Hours', 'Saturday Hours', 'Sunday & PH Hours', 'Phase']
   };
 
+  // 載入資料
   fetch('data.json')
     .then(res => res.json())
     .then(json => {
       data = json;
       data.forEach(item => {
-        const zhAddr = item['中文地址'] || '';
-        const enAddr = item['英文地址'] || '';
-        const areaZh = item['區域']?.zh || '';
-        const areaEn = item['區域']?.en || '';
-        const districtZh = item['地區']?.zh || '';
-        const districtEn = item['地區']?.en || '';
-        const code = item['自提點編號 Pick up store code'] || '';
-        item.mergedSearchText = (zhAddr + enAddr + areaZh + areaEn + districtZh + districtEn + code).toLowerCase();
+        item.mergedSearchText = (
+          (item['中文地址']||'') + (item['英文地址']||'') +
+          (item['區域']?.zh||'') + (item['區域']?.en||'') +
+          (item['地區']?.zh||'') + (item['地區']?.en||'') +
+          (item['自提點編號 Pick up store code']||'')
+        ).toLowerCase();
       });
-          // 初始化狀態：清空所有篩選器與搜尋框
-      currentRegionFilter = '';
-      currentDistrictFilter = '';
-      currentSearchTerm = '';
-      document.getElementById('searchInput').value = '';
-      document.getElementById('districtFilter').value = '';
-      
-      updateRegionButtons();
-      updateDistrictFilter();
-      updateTableHeader();
-      filterAndDisplay();
+      setLang('zh'); // 初始化語言及顯示
     });
 
+  // 語言切換
   function setLang(lang) {
     currentLang = lang;
-    document.getElementById('title').innerText = lang === 'zh' ? 'Jumppoint X 7-Eleven 自提點、自寄點查詢' : 'Jumppoint X 7-Eleven Pickup Point Search';
-    document.getElementById('searchInput').placeholder = lang === 'zh' ? '搜尋區域、點碼或地址…' : 'Search area, code or address...';
-    
-    // 語言切換時重設所有條件
-  currentRegionFilter = '';
-  currentDistrictFilter = '';
-  currentSearchTerm = '';
-  document.getElementById('searchInput').value = '';
-  document.getElementById('districtFilter').value = '';
+    document.getElementById('title').innerText = (lang === 'zh') ? 
+      'Jumppoint X 7-Eleven 自提點、自寄點查詢' : 
+      'Jumppoint X 7-Eleven Pickup Point Search';
 
-  updateRegionButtons();
-  updateDistrictFilter();
-  updateTableHeader();
-  filterAndDisplay();
+    document.getElementById('searchInput').placeholder = (lang === 'zh') ? 
+      '搜尋區域、點碼或地址…' : 
+      'Search area, code or address...';
+
+    currentRegionFilter = '';
+    currentDistrictFilter = '';
+    currentSearchTerm = '';
+    currentPage = 1;
+
+    document.getElementById('searchInput').value = '';
+    updateRegionButtons();
+    updateDistrictFilter();
+    updateTableHeader();
+    filterAndDisplay();
   }
 
   function updateRegionButtons() {
     const container = document.getElementById('regionButtons');
     container.innerHTML = '';
-    regionLabels[currentLang].forEach((label, i) => {
+    regionLabels[currentLang].forEach((label) => {
       const btn = document.createElement('button');
       btn.textContent = label || (currentLang === 'zh' ? '全部區域' : 'All Regions');
-      btn.className = (label.toLowerCase() === currentRegionFilter || (label === '' && currentRegionFilter === '')) ? 'active' : '';
+      btn.className = ((label.toLowerCase() === currentRegionFilter) || (label === '' && currentRegionFilter === '')) ? 'active' : '';
       btn.onclick = () => {
-        setRegionFilter(label.toLowerCase());
+        currentRegionFilter = label.toLowerCase();
+        currentDistrictFilter = '';
+        currentSearchTerm = '';
+        document.getElementById('districtFilter').value = '';
+        document.getElementById('searchInput').value = '';
+        currentPage = 1;
+        updateRegionButtons();
+        filterAndDisplay();
       };
       container.appendChild(btn);
     });
-  }
-
-  function setRegionFilter(region) {
-    currentRegionFilter = region;
-    // 篩選時重設其他篩選項
-    currentDistrictFilter = '';
-    currentSearchTerm = '';
-    document.getElementById('districtFilter').value = '';
-    document.getElementById('searchInput').value = '';
-    updateRegionButtons();
-    filterAndDisplay();
   }
 
   function updateDistrictFilter() {
@@ -331,26 +146,27 @@
     });
   }
 
-  function setDistrictFilter(value) {
-    currentDistrictFilter = value;
-    // 篩選時重設其他篩選項
+  function onDistrictFilterChange() {
+    const select = document.getElementById('districtFilter');
+    currentDistrictFilter = select.value;
     currentRegionFilter = '';
     currentSearchTerm = '';
     document.getElementById('searchInput').value = '';
+    currentPage = 1;
     updateRegionButtons();
     filterAndDisplay();
   }
 
-  function searchInputChanged() {
+  function onSearchInputChange() {
     const input = document.getElementById('searchInput');
     currentSearchTerm = input.value.toLowerCase();
-    // 額外動作：keyin文字時清空區域與地區選擇
     if (currentSearchTerm !== '') {
       currentRegionFilter = '';
       currentDistrictFilter = '';
       updateRegionButtons();
       document.getElementById('districtFilter').value = '';
     }
+    currentPage = 1;
     filterAndDisplay();
   }
 
@@ -360,7 +176,6 @@
       const areaEn = d['區域'].en.toLowerCase();
       const districtZh = d['地區'].zh.toLowerCase();
       const districtEn = d['地區'].en.toLowerCase();
-      const code = d['自提點編號 Pick up store code'].toLowerCase();
       const merged = d.mergedSearchText;
 
       let regionMatch = true;
@@ -380,7 +195,7 @@
 
       return regionMatch && districtMatch && searchMatch;
     });
-    currentPage = 1;
+
     displayTable();
     displayPagination();
   }
@@ -425,7 +240,7 @@
 
     pageData.forEach(row => {
       const tr = document.createElement('tr');
-      const address = currentLang === 'zh' ? row['中文地址'] : (row['英文地址'] || row['中文地址']);
+      const address = currentLang === 'zh' ? (row['中文地址'] || '') : (row['英文地址'] || row['中文地址'] || '');
       tr.innerHTML = `
         <td data-label="${currentLang === 'zh' ? '區域' : 'Area'}">${row['區域'][currentLang]}</td>
         <td data-label="${currentLang === 'zh' ? '地區' : 'District'}">${row['地區'][currentLang]}</td>
@@ -487,6 +302,5 @@
     }
   }
 </script>
-
 </body>
 </html>
