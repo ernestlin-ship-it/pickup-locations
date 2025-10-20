@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jumppoint 7-Eleven 自提點查詢</title>
+
+<!-- Google 字體 -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9fa;
+    color: #383e71;
+    margin: 20px;
+  }
+  .container {
+    max-width: 1000px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 60px 0 rgb(122 111 168 / 0.1);
+  }
+  h2 {
+    font-weight: 300;
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1246A0;
+  }
+  .lang-switch {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .lang-switch button {
+    background-color: #1467D6;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 9px 22px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0 10px;
+  }
+  .lang-switch button:hover {
+    background-color: #0D3B79;
+  }
+  #searchInput {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 8px;
+    box-shadow: inset 0 0 12px rgb(76 136 225 / 0.15);
+  }
+  .sort-hint {
+    text-align: center;
+    font-size: 14px;
+    font-style: italic;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: inset 0 0 15px rgb(81 94 153 / 0.15);
+    border-radius: 10px;
+    background: #fff;
+    table-layout: fixed;
+  }
+  th, td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #d1dff5;
+    font-weight: 400;
+    font-size: 14px;
+  }
+  th {
+    background-color: #d1daff;
+    font-weight: 600;
+    cursor: pointer;
+    color: #1246A0;
+  }
+  th:hover {
+    background-color: #b8ccff;
+    color: #0d276b;
+  }
+  tr:hover {
+    background-color: #cae0ff;
+  }
+  a {
+    color: #1467D6;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  @media(max-width:600px) {
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+    tr {
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px #a5bbec;
+      padding: 15px;
+    }
+    th { display: none; }
+    td {
+      position: relative;
+      padding-left: 55%;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border: none;
+      border-bottom: 1px solid #d1dff5;
+      text-align: right;
+    }
+    td:before {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 45%;
+      font-weight: 600;
+      color: #1246A0;
+      white-space: nowrap;
+      content: attr(data-label);
+      font-size: 14px;
+      text-align: left;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2 id="title">Jumppoint 7-Eleven 自提點查詢</h2>
+<div class="lang-switch">
+  <button onclick="setLang('zh')">中文</button>
+  <button onclick="setLang('en')">English</button>
+</div>
+
+<p class="sort-hint">點擊表格標題即可排序</p>
+<input type="text" id="searchInput" placeholder="搜尋區域、點碼或地址…" onkeyup="filterTable()" />
+
+<table id="storeTable">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">區域 / Area</th>
+      <th onclick="sortTable(1)">地區 / District</th>
+      <th onclick="sortTable(2)">自提點編號 / Pick up code</th>
+      <th onclick="sortTable(3)">地址 / Address</th>
+      <th onclick="sortTable(4)">營業時間(週一至五) / Weekday Hours</th>
+      <th onclick="sortTable(5)">營業時間(週六) / Saturday Hours</th>
+      <th onclick="sortTable(6)">營業時間(週日及公眾假期) / Sunday & PH Hours</th>
+      <th onclick="sortTable(7)">Phase</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<script>
+  let data = [];
+
+  fetch('output_pickup_points.json')
+    .then(response => response.json())
+    .then(json => {
+      data = json;
+      buildTable();  // 呼叫你原本顯示表格的函數
+    })
+    .catch(err => console.error('載入JSON失敗:', err));
+
+  let currentLang='zh';
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('title').innerText = lang === 'zh' ? 'Jumppoint 7-Eleven 自提點查詢' : 'Jumppoint 7-Eleven Pickup Point Search';
+    document.getElementById('searchInput').placeholder = lang === 'zh' ? '搜尋區域、點碼或地址…' : 'Search by area, code or address...';
+    buildTable();
+  }
+
+  function buildTable() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    data.forEach(row => {
+      const address = currentLang==='zh' ? row['中文地址'] : row['英文地址'];
+      tbody.innerHTML += `
+        <tr>
+          <td data-label="${currentLang==='zh' ? '區域' : 'Area'}">${row['區域'][currentLang]}</td>
+          <td data-label="${currentLang==='zh' ? '地區' : 'District'}">${row['地區'][currentLang]}</td>
+          <td data-label="${currentLang==='zh' ? '自提點編號' : 'Pickup Code'}">${row['自提點編號 Pick up store code']}</td>
+          <td data-label="${currentLang==='zh' ? '地址' : 'Address'}"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank">${address}</a></td>
+          <td data-label="${currentLang==='zh' ? '營業時間(週一至五)' : 'Weekday Hours'}">${row['Mon-Fri (星期一至五開放時間)']}</td>
+          <td data-label="${currentLang==='zh' ? '營業時間(週六)' : 'Saturday Hours'}">${row['Sat (星期六開放時間)']}</td>
+          <td data-label="${currentLang==='zh' ? '營業時間(週日及公眾假期)' : 'Sunday & PH Hours'}">${row['Sun & PH (星期日及公眾假期開放時間)']}</td>
+          <td data-label="Phase">${row['Phase']}</td>
+        </tr>`;
+    });
+  }
+
+  function filterTable() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    document.querySelectorAll('#tableBody tr').forEach(tr => {
+      const text = tr.innerText.toLowerCase();
+      tr.style.display = text.includes(filter) ? '' : 'none';
+    });
+  }
+
+  function sortTable(colIndex) {
+    const tbody = document.getElementById('tableBody');
+    const rows = Array.from(tbody.rows);
+    let ascending = true;
+    rows.sort((a, b) => {
+      let aText = a.cells[colIndex].innerText.trim().toLowerCase();
+      let bText = b.cells[colIndex].innerText.trim().toLowerCase();
+      const aNum = parseFloat(aText.replace(/[^0-9.-]/g,''));
+      const bNum = parseFloat(bText.replace(/[^0-9.-]/g,''));
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return ascending ? aNum - bNum : bNum - aNum;
+      }
+      if (aText < bText) return ascending ? -1 : 1;
+      if (aText > bText) return ascending ? 1 : -1;
+      return 0;
+    });
+    rows.forEach(row => tbody.appendChild(row));
+    // 切換排序方向
+    // 可以做一個全局變數來記錄每個欄位方向
+  }
+
+  setLang('zh');
+</script>
+</body>
+</html>
