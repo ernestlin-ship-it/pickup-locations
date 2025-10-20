@@ -226,7 +226,7 @@
       <input type="text" id="searchInput" placeholder="搜尋區域、點碼或地址…" onkeyup="filterAndDisplay()" />
     </div>
 
-    <p class="sort-hint">點擊表格標題即可排序</p>
+    <p class="sort-hint">點擊表格標題即可排序 Click Header to Sort</p>
 
     <table id="storeTable">
       <thead>
@@ -248,170 +248,202 @@
   </div>
 
   <script>
-    let data = [];
-    let filteredData = [];
-    let currentLang = 'zh';
-    let currentSort = {
-      col: null,
-      ascending: true
+let data = [];
+let filteredData = [];
+let currentLang = 'zh';
+let currentSort = { col: null, ascending: true };
+let currentPage = 1;
+let currentRegionFilter = '';
+const pageSize = 50;
+
+// 兩語言的分區按鈕文字
+const regionLabels = {
+  zh: ['', '九龍', '新界', '港島', '離島'],
+  en: ['', 'Kowloon', 'New Territories', 'Hong Kong Island', 'Outlying Islands']
+};
+
+// 兩語言的表格標題
+const tableHeaders = {
+  zh: ['區域', '地區', '自提點編號', '地址', '營業時間(週一至五)', '營業時間(週六)', '營業時間(週日及公眾假期)', 'Phase'],
+  en: ['Area', 'District', 'Pick up code', 'Address', 'Weekday Hours', 'Saturday Hours', 'Sunday & PH Hours', 'Phase']
+};
+
+fetch('data.json')
+  .then(res => res.json())
+  .then(json => {
+    data = json;
+    data.forEach(item => {
+      const zhAddr = item['中文地址'] || '';
+      const enAddr = item['英文地址'] || '';
+      const areaZh = item['區域']?.zh || '';
+      const areaEn = item['區域']?.en || '';
+      const districtZh = item['地區']?.zh || '';
+      const districtEn = item['地區']?.en || '';
+      const code = item['自提點編號 Pick up store code'] || '';
+      item.mergedSearchText = (zhAddr + enAddr + areaZh + areaEn + districtZh + districtEn + code).toLowerCase();
+    });
+    updateRegionButtons();
+    updateTableHeader();
+    filterAndDisplay();
+  });
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('title').innerText = lang === 'zh' ? 'Jumppoint X 7-Eleven 自提點、自寄點查詢' : 'Jumppoint X 7-Eleven Pickup Point Search';
+  document.getElementById('searchInput').placeholder = lang === 'zh' ? '搜尋區域、點碼或地址…' : 'Search area, code or address...';
+  updateRegionButtons();
+  updateTableHeader();
+  filterAndDisplay();
+}
+
+// 更新分區按鈕文字
+function updateRegionButtons() {
+  const container = document.getElementById('regionButtons');
+  container.innerHTML = '';
+  regionLabels[currentLang].forEach((label, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = label || (currentLang === 'zh' ? '全部區域' : 'All Regions');
+    btn.className = (label.toLowerCase() === currentRegionFilter) ? 'active' : '';
+    btn.onclick = () => {
+      setRegionFilter(label.toLowerCase());
     };
-    let currentPage = 1;
-    let currentRegionFilter = '';
-    const pageSize = 50;
+    container.appendChild(btn);
+  });
+}
 
-    // 載入 JSON 並呼叫 function
-    fetch('data.json')
-      .then(res => res.json())
-      .then(json => {
-        data = json;
-        // 預處理文字搜尋合併欄位
-        data.forEach(item => {
-          const zhAddr = item['中文地址'] || '';
-          const enAddr = item['英文地址'] || '';
-          const areaZh = item['區域']?.zh || '';
-          const areaEn = item['區域']?.en || '';
-          const districtZh = item['地區']?.zh || '';
-          const districtEn = item['地區']?.en || '';
-          const code = item['自提點編號 Pick up store code'] || '';
-          item.mergedSearchText = (zhAddr + enAddr + areaZh + areaEn + districtZh + districtEn + code).toLowerCase();
-        });
-        filterAndDisplay();
-      });
+function setRegionFilter(region) {
+  currentRegionFilter = region;
+  updateRegionButtons();
+  filterAndDisplay();
+}
 
-    function setLang(lang) {
-      currentLang = lang;
-      document.getElementById('title').innerText = lang === 'zh' ? 'Jumppoint X 7-Eleven 自提點、自寄點查詢' : 'Jumppoint X 7-Eleven Pickup Point Search';
-      document.getElementById('searchInput').placeholder = lang === 'zh' ? '搜尋區域、點碼或地址…' : 'Search area, code or address...';
-      filterAndDisplay();
+function updateTableHeader() {
+  const headers = tableHeaders[currentLang];
+  for (let i = 0; i < headers.length; i++) {
+    const th = document.querySelector(`#storeTable th:nth-child(${i + 1})`);
+    if (th) {
+      th.firstChild.textContent = headers[i] + ' ';
     }
+  }
+  // 更新箭頭顯示
+  updateSortArrows();
+}
 
-    // 設定區域過濾，更新按鈕狀態
-    function setRegionFilter(region) {
-      currentRegionFilter = region.toLowerCase();
-      // 按鈕活躍狀態切換
-      let buttons = document.querySelectorAll('#regionButtons button');
-      buttons.forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.toLowerCase() === currentRegionFilter);
-      });
-      filterAndDisplay();
+function filterAndDisplay() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+  filteredData = data.filter(d => {
+    const areaZh = d['區域'].zh.toLowerCase();
+    const areaEn = d['區域'].en.toLowerCase();
+    const districtZh = d['地區'].zh.toLowerCase();
+    const districtEn = d['地區'].en.toLowerCase();
+    const code = d['自提點編號 Pick up store code'].toLowerCase();
+    const merged = d.mergedSearchText;
+
+    let regionMatch = true;
+    if (currentRegionFilter) {
+      regionMatch = (areaZh === currentRegionFilter || areaEn === currentRegionFilter);
     }
+    return regionMatch && merged.includes(searchTerm);
+  });
 
-    // 過濾顯示
-    function filterAndDisplay() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      filteredData = data.filter(d => {
-        const areaZh = d['區域'].zh.toLowerCase();
-        const areaEn = d['區域'].en.toLowerCase();
-        const districtZh = d['地區'].zh.toLowerCase();
-        const districtEn = d['地區'].en.toLowerCase();
-        const code = d['自提點編號 Pick up store code'].toLowerCase();
-        const merged = d.mergedSearchText;
+  currentPage = 1;
+  displayTable();
+  displayPagination();
+}
 
-        let regionMatch = true;
-        if (currentRegionFilter) {
-          regionMatch = (areaZh === currentRegionFilter || areaEn === currentRegionFilter);
-        }
-        return regionMatch && merged.includes(searchTerm);
-      });
-      currentPage = 1;
+function displayTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  if (filteredData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8">${currentLang === 'zh' ? '無符合條件的資料' : 'No matching data'}</td></tr>`;
+    return;
+  }
+
+  if (currentSort.col !== null) {
+    filteredData.sort((a, b) => {
+      let aVal, bVal;
+      switch (currentSort.col) {
+        case 0:
+          aVal = a['區域'][currentLang];
+          bVal = b['區域'][currentLang];
+          break;
+        case 1:
+          aVal = a['地區'][currentLang];
+          bVal = b['地區'][currentLang];
+          break;
+        case 2:
+          aVal = a['自提點編號 Pick up store code'];
+          bVal = b['自提點編號 Pick up store code'];
+          break;
+        default:
+          aVal = '';
+          bVal = '';
+      }
+      if (aVal < bVal) return currentSort.ascending ? -1 : 1;
+      if (aVal > bVal) return currentSort.ascending ? 1 : -1;
+      return 0;
+    });
+  }
+
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+  const pageData = filteredData.slice(start, end);
+
+  pageData.forEach(row => {
+    const tr = document.createElement('tr');
+    const address = currentLang === 'zh' ? row['中文地址'] : (row['英文地址'] || row['中文地址']);
+    tr.innerHTML = `
+      <td data-label="${currentLang === 'zh' ? '區域' : 'Area'}">${row['區域'][currentLang]}</td>
+      <td data-label="${currentLang === 'zh' ? '地區' : 'District'}">${row['地區'][currentLang]}</td>
+      <td data-label="${currentLang === 'zh' ? '自提點編號' : 'Pickup Code'}">${row['自提點編號 Pick up store code']}</td>
+      <td data-label="${currentLang === 'zh' ? '地址' : 'Address'}"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank">${address}</a></td>
+      <td data-label="${currentLang === 'zh' ? '營業時間(週一至五)' : 'Weekday Hours'}">${row['Mon-Fri (星期一至五開放時間)']}</td>
+      <td data-label="${currentLang === 'zh' ? '營業時間(週六)' : 'Saturday Hours'}">${row['Sat (星期六開放時間)']}</td>
+      <td data-label="${currentLang === 'zh' ? '營業時間(週日及公眾假期)' : 'Sunday & PH Hours'}">${row['Sun & PH (星期日及公眾假期開放時間)']}</td>
+      <td data-label="Phase">${row['Phase']}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function sortTable(colIndex) {
+  if (currentSort.col === colIndex) {
+    currentSort.ascending = !currentSort.ascending;
+  } else {
+    currentSort.col = colIndex;
+    currentSort.ascending = true;
+  }
+  updateSortArrows();
+  displayTable();
+  displayPagination();
+}
+
+function updateSortArrows() {
+  for (let i = 0; i <= 7; i++) {
+    const arrow = document.getElementById(`sort-arrow-${i}`);
+    arrow.textContent = i === currentSort.col ? (currentSort.ascending ? '▲' : '▼') : '';
+  }
+}
+
+function displayPagination() {
+  const pagination = document.getElementById('pagination');
+  pagination.innerHTML = '';
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+
+  for (let i = 1; i <= totalPages; i++) {
+    const button = document.createElement('button');
+    button.textContent = i;
+    button.disabled = (i === currentPage);
+    button.onclick = () => {
+      currentPage = i;
       displayTable();
       displayPagination();
-    }
+    };
+    pagination.appendChild(button);
+  }
+}
 
-    // 渲染表格
-    function displayTable() {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
-      if (filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8">無符合條件的資料</td></tr>`;
-        return;
-      }
-      // 排序
-      if (currentSort.col !== null) {
-        filteredData.sort((a, b) => {
-          let aVal, bVal;
-          switch (currentSort.col) {
-            case 0:
-              aVal = a['區域'][currentLang];
-              bVal = b['區域'][currentLang];
-              break;
-            case 1:
-              aVal = a['地區'][currentLang];
-              bVal = b['地區'][currentLang];
-              break;
-            case 2:
-              aVal = a['自提點編號 Pick up store code'];
-              bVal = b['自提點編號 Pick up store code'];
-              break;
-            default:
-              aVal = '';
-              bVal = '';
-          }
-          if (aVal < bVal) return currentSort.ascending ? -1 : 1;
-          if (aVal > bVal) return currentSort.ascending ? 1 : -1;
-          return 0;
-        });
-      }
-
-      const start = (currentPage - 1) * pageSize;
-      const end = start + pageSize;
-      const pageData = filteredData.slice(start, end);
-
-      pageData.forEach(row => {
-        const tr = document.createElement('tr');
-        const address = currentLang === 'zh' ? row['中文地址'] : (row['英文地址'] || row['中文地址']);
-        tr.innerHTML = `
-          <td data-label="${currentLang === 'zh' ? '區域' : 'Area'}">${row['區域'][currentLang]}</td>
-          <td data-label="${currentLang === 'zh' ? '地區' : 'District'}">${row['地區'][currentLang]}</td>
-          <td data-label="${currentLang === 'zh' ? '自提點編號' : 'Pickup Code'}">${row['自提點編號 Pick up store code']}</td>
-          <td data-label="${currentLang === 'zh' ? '地址' : 'Address'}"><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank">${address}</a></td>
-          <td data-label="${currentLang === 'zh' ? '營業時間(週一至五)' : 'Weekday Hours'}">${row['Mon-Fri (星期一至五開放時間)']}</td>
-          <td data-label="${currentLang === 'zh' ? '營業時間(週六)' : 'Saturday Hours'}">${row['Sat (星期六開放時間)']}</td>
-          <td data-label="${currentLang === 'zh' ? '營業時間(週日及公眾假期)' : 'Sunday & PH Hours'}">${row['Sun & PH (星期日及公眾假期開放時間)']}</td>
-          <td data-label="Phase">${row['Phase']}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // 排序功能
-    function sortTable(colIndex) {
-      if (currentSort.col === colIndex) {
-        currentSort.ascending = !currentSort.ascending;
-      } else {
-        currentSort.col = colIndex;
-        currentSort.ascending = true;
-      }
-
-      // 更新排序箭頭
-      for (let i = 0; i <= 7; i++) {
-        const arrow = document.getElementById(`sort-arrow-${i}`);
-        arrow.textContent = i === currentSort.col ? (currentSort.ascending ? '▲' : '▼') : '';
-      }
-
-      currentPage = 1;
-      displayTable();
-      displayPagination();
-    }
-
-    // 分頁功能
-    function displayPagination() {
-      const pagination = document.getElementById('pagination');
-      pagination.innerHTML = '';
-      const totalPages = Math.ceil(filteredData.length / pageSize);
-
-      for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.textContent = i;
-        button.disabled = (i === currentPage);
-        button.onclick = () => {
-          currentPage = i;
-          displayTable();
-          displayPagination();
-        };
-        pagination.appendChild(button);
-      }
-    }
   </script>
 
 </body>
