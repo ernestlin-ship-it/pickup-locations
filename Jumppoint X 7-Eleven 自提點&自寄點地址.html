@@ -256,6 +256,13 @@
         const code = item['自提點編號 Pick up store code'] || '';
         item.mergedSearchText = (zhAddr + enAddr + areaZh + areaEn + districtZh + districtEn + code).toLowerCase();
       });
+          // 初始化狀態：清空所有篩選器與搜尋框
+      currentRegionFilter = '';
+      currentDistrictFilter = '';
+      currentSearchTerm = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('districtFilter').value = '';
+      
       updateRegionButtons();
       updateDistrictFilter();
       updateTableHeader();
@@ -268,14 +275,16 @@
     document.getElementById('searchInput').placeholder = lang === 'zh' ? '搜尋區域、點碼或地址…' : 'Search area, code or address...';
     
     // 語言切換時重設所有條件
-    currentRegionFilter = '';
-    currentDistrictFilter = '';
-    currentSearchTerm = '';
-    document.getElementById('searchInput').value = '';
-    updateRegionButtons();
-    updateDistrictFilter();
-    updateTableHeader();
-    filterAndDisplay();
+  currentRegionFilter = '';
+  currentDistrictFilter = '';
+  currentSearchTerm = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('districtFilter').value = '';
+
+  updateRegionButtons();
+  updateDistrictFilter();
+  updateTableHeader();
+  filterAndDisplay();
   }
 
   function updateRegionButtons() {
