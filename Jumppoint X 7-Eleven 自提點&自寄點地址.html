@@ -192,8 +192,8 @@
   </div>
   <div id="searchContainer">
     <div id="regionButtons" style="margin-bottom: 8px;"></div>
-    <select id="districtFilter" onchange="onDistrictFilterChange()"></select>
-    <input type="text" id="searchInput" placeholder="搜尋區域、點碼或地址…" oninput="onSearchInputChange()" />
+    <select id="districtFilter" onchange="onDistrictFilterChange()" aria-label="District Filter"></select>
+    <input type="text" id="searchInput" placeholder="搜尋區域、點碼或地址…" oninput="onSearchInputChange()" aria-label="Search Input"/>
   </div>
   <p class="sort-hint" id="sortHint">點擊表格標題即可排序 Click Header to Sort</p>
   <div id="paginationTop"></div>
@@ -260,22 +260,7 @@
 
       setLang('zh'); // 預設中文並初始化UI
     });
-function updateTableHeader() {
-  const headers = tableHeaders[currentLang];
-  for (let i = 0; i < headers.length; i++) {
-    const th = document.querySelector(`#storeTable th:nth-child(${i + 1})`);
-    if (th) {
-      th.innerHTML = ''; // 清空當前內容
-      th.appendChild(document.createTextNode(headers[i] + ' '));
-      const arrowSpan = document.createElement('span');
-      arrowSpan.id = `sort-arrow-${i}`;
-      th.appendChild(arrowSpan);
-      if (currentSort.col === i) {
-        arrowSpan.textContent = currentSort.ascending ? '▲' : '▼';
-      }
-    }
-  }
-}
+
   function setLang(lang) {
     currentLang = lang;
     currentRegionFilter = '';
@@ -284,7 +269,7 @@ function updateTableHeader() {
     currentPage = 1;
     document.getElementById('searchInput').value = '';
     document.getElementById('districtFilter').value = '';
-    
+
     document.getElementById('title').innerText = lang === 'zh' ? 'Jumppoint X 7-Eleven 自提點、自寄點查詢' : 'Jumppoint X 7-Eleven Pickup Point Search';
     document.getElementById('searchInput').placeholder = lang === 'zh' ? '搜尋區域、點碼或地址…' : 'Search area, code or address...';
 
@@ -303,7 +288,7 @@ function updateTableHeader() {
       btn.textContent = label || (currentLang === 'zh' ? '全部區域' : 'All Regions');
       btn.className = (btnLabelCmp === currentRegionFilter || (label === '' && currentRegionFilter === '')) ? 'active' : '';
       btn.onclick = () => {
-        currentRegionFilter = btnLabelCmp; 
+        currentRegionFilter = btnLabelCmp;
         currentDistrictFilter = '';
         currentSearchTerm = '';
         currentPage = 1;
@@ -316,24 +301,23 @@ function updateTableHeader() {
     });
   }
 
-function updateDistrictFilter() {
-  const select = document.getElementById('districtFilter');
-  select.innerHTML = '';
-  const allOption = document.createElement('option');
-  allOption.value = '';
-  allOption.textContent = currentLang === 'zh' ? '全部地區' : 'All Districts';
-  select.appendChild(allOption);
+  function updateDistrictFilter() {
+    const select = document.getElementById('districtFilter');
+    select.innerHTML = '';
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = currentLang === 'zh' ? '全部地區' : 'All Districts';
+    select.appendChild(allOption);
 
-  const districtsRaw = Array.from(new Set(data.map(d => d['地區'][currentLang]))).sort();
-  districtsRaw.forEach(dist => {
-    const option = document.createElement('option');
-    option.value = dist.toLowerCase();  // 轉成小寫
-    option.textContent = dist;
-    if (dist.toLowerCase() === currentDistrictFilter) option.selected = true;
-    select.appendChild(option);
-  });
-}
-
+    const districtsRaw = Array.from(new Set(data.map(d => d['地區'][currentLang]))).sort();
+    districtsRaw.forEach(dist => {
+      const option = document.createElement('option');
+      option.value = dist.toLowerCase();
+      option.textContent = dist;
+      if (dist.toLowerCase() === currentDistrictFilter) option.selected = true;
+      select.appendChild(option);
+    });
+  }
 
   function onDistrictFilterChange() {
     const select = document.getElementById('districtFilter');
@@ -359,34 +343,35 @@ function updateDistrictFilter() {
     filterAndDisplay();
   }
 
-function filterAndDisplay() {
-  filteredData = data.filter(d => {
-    const areaZh = d['區域'].zh.toLowerCase();
-    const areaEn = d._areaEnFixed || d['區域'].en.toLowerCase();
-    const districtZh = d['地區'].zh.toLowerCase();
-    const districtEn = d['地區'].en.toLowerCase();
-    const merged = d.mergedSearchText;
+  function filterAndDisplay() {
+    filteredData = data.filter(d => {
+      const areaZh = d['區域'].zh.toLowerCase();
+      const areaEn = d._areaEnFixed || d['區域'].en.toLowerCase();
+      const districtZh = d['地區'].zh.toLowerCase();
+      const districtEn = d['地區'].en.toLowerCase();
+      const merged = d.mergedSearchText;
 
-    let regionMatch = true;
-    if (currentRegionFilter) {
-      regionMatch = (areaZh === currentRegionFilter || areaEn === currentRegionFilter);
-    }
+      let regionMatch = true;
+      if (currentRegionFilter) {
+        regionMatch = (areaZh === currentRegionFilter || areaEn === currentRegionFilter);
+      }
 
-    let districtMatch = true;
-    if (currentDistrictFilter) {
-      // 因為 option value 是小寫，故此條件為 lowerCase比對
-      districtMatch = (districtZh === currentDistrictFilter || districtEn === currentDistrictFilter);
-    }
+      let districtMatch = true;
+      if (currentDistrictFilter) {
+        districtMatch = (districtZh === currentDistrictFilter || districtEn === currentDistrictFilter);
+      }
 
-    let searchMatch = true;
-    if (currentSearchTerm) {
-      searchMatch = merged.includes(currentSearchTerm);
-    }
+      let searchMatch = true;
+      if (currentSearchTerm) {
+        searchMatch = merged.includes(currentSearchTerm);
+      }
 
-    return regionMatch && districtMatch && searchMatch;
-  });
-  displayTable();
-  displayPagination();
+      return regionMatch && districtMatch && searchMatch;
+    });
+
+    displayTable();
+    displayPagination();
+  }
 
   function displayTable() {
     const tbody = document.getElementById('tableBody');
