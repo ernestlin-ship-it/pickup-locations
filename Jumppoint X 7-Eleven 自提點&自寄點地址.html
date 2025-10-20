@@ -16,7 +16,9 @@
       color: #383e71;
       margin: 20px;
     }
-
+  <div style="text-align: right; margin-top: 8px; margin-bottom: 8px;">
+  <div id="paginationTop"></div>
+</div>
     .container {
       max-width: 1000px;
       margin: auto;
@@ -433,22 +435,34 @@ function updateSortArrows() {
 }
 
 function displayPagination() {
-  const pagination = document.getElementById('pagination');
-  pagination.innerHTML = '';
+  const paginationBottom = document.getElementById('pagination');
+  const paginationTop = document.getElementById('paginationTop');
+  paginationBottom.innerHTML = '';
+  paginationTop.innerHTML = '';
+  
   const totalPages = Math.ceil(filteredData.length / pageSize);
 
-  for (let i = 1; i <= totalPages; i++) {
-    const button = document.createElement('button');
-    button.textContent = i;
-    button.disabled = (i === currentPage);
-    button.onclick = () => {
+  for(let i = 1; i <= totalPages; i++) {
+    const buttonTop = document.createElement('button');
+    const buttonBottom = document.createElement('button');
+
+    buttonTop.textContent = i;
+    buttonBottom.textContent = i;
+
+    buttonTop.disabled = (i === currentPage);
+    buttonBottom.disabled = (i === currentPage);
+
+    buttonTop.onclick = buttonBottom.onclick = () => {
       currentPage = i;
       displayTable();
       displayPagination();
     };
-    pagination.appendChild(button);
+
+    paginationTop.appendChild(buttonTop);
+    paginationBottom.appendChild(buttonBottom);
   }
 }
+
   </script>
 </body>
 
