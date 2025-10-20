@@ -167,15 +167,30 @@
   let currentLang = 'zh';
 
   // 載入 JSON 並呼叫 buildTable
-  fetch('data.json')
-    .then(res => res.json())
-    .then(json => {
-      data = json;
-      buildTable();
-    })
-    .catch(err => {
-      console.error('載入 data.json 失敗:', err);
+fetch('data.json')
+  .then(res => res.json())
+  .then(json => {
+    data = json;
+
+    // 加入 mergedSearchText屬性
+    data.forEach(item => {
+      const zhAddr = item['中文地址'] || '';
+      const enAddr = item['英文地址'] || '';
+      const areaZh = item['區域']?.zh || '';
+      const areaEn = item['區域']?.en || '';
+      const districtZh = item['地區']?.zh || '';
+      const districtEn = item['地區']?.en || '';
+      const code = item['自提點編號 Pick up store code'] || '';
+
+      item.mergedSearchText = (zhAddr + enAddr + areaZh + areaEn + districtZh + districtEn + code).toLowerCase();
     });
+
+    buildTable();
+  })
+  .catch(err => {
+    console.error('載入JSON錯誤', err);
+  });
+
 
   // 切換語言
   function setLang(lang) {
@@ -219,27 +234,11 @@
 function filterTable() {
   const input = document.getElementById('searchInput');
   const filter = input.value.toLowerCase();
-  
   document.querySelectorAll('#tableBody tr').forEach(tr => {
-    // 取出當前行中所有儲存格文字（合併）
-    const tds = tr.querySelectorAll('td');
-
-    // 多欄組合搜尋，包含城市中文、英文、地址等
-    const areaZh = tds[0]?.innerText.toLowerCase() || '';
-    const areaEn = tds[0]?.getAttribute('data-label') === 'Area' ? tds[0].innerText.toLowerCase() : '';
-    const districtZh = tds[1]?.innerText.toLowerCase() || '';
-    const districtEn = tds[1]?.getAttribute('data-label') === 'District' ? tds[1].innerText.toLowerCase() : '';
-    const code = tds[2]?.innerText.toLowerCase() || '';
-    const addressZh = tds[3]?.innerText.toLowerCase() || '';
-    const addressEn = tds[3]?.querySelector('a')?.getAttribute('href')?.toLowerCase() || '';
-
-    const combinedText = (areaZh + areaEn + districtZh + districtEn + code + addressZh + addressEn);
-
-    if (combinedText.includes(filter)) {
-      tr.style.display = '';
-    } else {
-      tr.style.display = 'none';
-    }
+    const index = Array.from(tr.parentNode.children).indexOf(tr);
+    // 用資料對應的 mergedSearchText 做搜尋比對
+    const match = data[index].mergedSearchText.includes(filter);
+    tr.style.display = match ? '' : 'none';
   });
 }
 
